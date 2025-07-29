@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Medical Imaging Report System",
+    "version": "1.0.0",
+    "defaultPort": 3000,
+    "autoOpenBrowser": true
+  },
+  "clinic": {
+    "defaultName": "BREATHE CLINIC",
+    "defaultAddress": "Medical Center\nCity, State - 123456\nPhone: +91-XXXXXXXXXX"
+  },
+  "pdf": {
+    "defaultImageSize": 120,
+    "defaultImagesPerPage": 2,
+    "margins": {
+      "top": "15mm",
+      "right": "15mm", 
+      "bottom": "15mm",
+      "left": "15mm"
+    }
+  },
+  "uploads": {
+    "maxFileSize": "50mb",
+    "allowedTypes": ["image/jpeg", "image/jpg", "image/png"],
+    "compressionQuality": 0.8,
+    "maxWidth": 1200
+  }
+}
