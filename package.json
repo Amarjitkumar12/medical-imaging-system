@@ -1,7 +1,7 @@
 {
   "name": "medical-imaging-report-system",
   "version": "1.0.0",
-  "description": "X-ray and Ultrasound Reporting System - Professional medical imaging report generator",
+  "description": "X-ray and Ultrasound Reporting System - Professional medical imaging report generator with PostgreSQL",
   "main": "api/index.js",
   "scripts": {
     "start": "node server.js",
@@ -9,11 +9,9 @@
     "vercel": "node api/index.js",
     "vercel-build": "echo 'Build complete'",
     "app": "node server.js",
-    "setup": "npm install && echo Setup complete! Run 'npm run app' to start the application.",
+    "setup": "npm install && echo Setup complete! Run 'npm start' to start the application.",
     "clean": "rm -rf node_modules package-lock.json && npm install",
-    "migrate": "node migrate-to-mongodb.js",
-    "create-admin": "node create-admin.js",
-    "setup-mongodb": "npm install && echo MongoDB setup complete! Run 'npm run migrate' to transfer existing data, then 'npm start' to run the app."
+    "create-admin": "node create-admin.js"
   },
   "keywords": [
     "medical",
@@ -32,7 +30,6 @@
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.5",
     "multer": "^2.0.0",
     "pg": "^8.11.3",
     "puppeteer": "^22.8.2"
