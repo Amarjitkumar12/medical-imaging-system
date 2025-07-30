@@ -6,11 +6,31 @@ let pool;
 
 const connectDB = async () => {
   try {
-    // Railway automatically provides DATABASE_URL
-    const connectionString = process.env.DATABASE_URL;
+    // Railway PostgreSQL connection - multiple ways to get connection string
+    let connectionString = process.env.DATABASE_URL;
+    
+    // If DATABASE_URL is not set, try to construct from individual variables
+    if (!connectionString) {
+      const host = process.env.PGHOST || process.env.DB_HOST;
+      const port = process.env.PGPORT || process.env.DB_PORT;
+      const database = process.env.PGDATABASE || process.env.DB_NAME || 'railway';
+      const user = process.env.PGUSER || process.env.DB_USER || 'postgres';
+      const password = process.env.PGPASSWORD || process.env.DB_PASSWORD;
+      
+      if (host && port && user && password) {
+        connectionString = `postgresql://${user}:${password}@${host}:${port}/${database}`;
+        console.log('✅ Constructed DATABASE_URL from individual variables');
+      }
+    }
     
     if (!connectionString) {
-      throw new Error('DATABASE_URL not found. Make sure Railway PostgreSQL is added.');
+      console.log('⚠️  DATABASE_URL not found. Railway PostgreSQL may not be properly connected.');
+      console.log('💡 In Railway dashboard:');
+      console.log('   1. Go to your PostgreSQL database service');
+      console.log('   2. Copy the "Connection URL"');
+      console.log('   3. Go to your app service');
+      console.log('   4. Add environment variable: DATABASE_URL = [connection string]');
+      throw new Error('DATABASE_URL not found. Please connect Railway PostgreSQL to your app.');
     }
     
     pool = new Pool({
@@ -21,9 +41,12 @@ const connectDB = async () => {
     // Test connection
     await pool.query('SELECT NOW()');
     console.log('✅ Railway PostgreSQL connected successfully');
+    console.log(`🔗 Connected to: ${connectionString.replace(/:[^:]*@/, ':****@')}`);
     return true;
   } catch (error) {
-    console.error('❌ Railway PostgreSQL connection error:', error);
+    console.error('❌ Railway PostgreSQL connection error:', error.message);
+    console.log('🔄 Server will continue without database connection');
+    console.log('💡 Database connection will be retried on first request');
     return false;
   }
 };
@@ -31,8 +54,12 @@ const connectDB = async () => {
 // Initialize database tables
 const initializeDatabase = async () => {
   try {
+    console.log('🔄 Initializing Railway PostgreSQL database...');
     const connected = await connectDB();
-    if (!connected) return false;
+    if (!connected) {
+      console.log('⚠️  Database connection failed, will retry later');
+      return false;
+    }
     
     console.log('🔄 Creating database tables...');
     
