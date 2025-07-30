@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -146,7 +146,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
             role: 'doctor'
         });
         
-        console.log(`✅ New clinic registered: ${clinicName} (${email})`);
+        console.log(`âœ… New clinic registered: ${clinicName} (${email})`);
         res.status(201).json({ 
             success: true, 
             message: 'Account created successfully',
@@ -154,7 +154,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Registration error:', error);
+        console.error('âŒ Registration error:', error);
         res.status(500).json({ error: 'Registration failed', details: error.message });
     }
 });
@@ -191,7 +191,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
             { expiresIn: '24h' }
         );
         
-        console.log(`✅ User logged in: ${user.clinicName} (${email})`);
+        console.log(`âœ… User logged in: ${user.clinicName} (${email})`);
         res.json({
             success: true,
             token,
@@ -205,7 +205,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Login error:', error);
+        console.error('âŒ Login error:', error);
         res.status(500).json({ error: 'Login failed', details: error.message });
     }
 });
@@ -216,7 +216,7 @@ app.post('/generate-pdf', authenticateToken, async (req, res) => {
     try {
         const { patientData, images, imagesPerPage, clinicData, reportType, imageSize, previewOnly } = req.body;
         
-        console.log(`📋 Generating ${reportType} ${previewOnly ? 'preview' : 'report'} for patient: ${patientData.name}`);
+        console.log(`ðŸ“‹ Generating ${reportType} ${previewOnly ? 'preview' : 'report'} for patient: ${patientData.name}`);
 
         // Convert base64 images to buffer format
         const imageBuffers = images.map(img => ({
@@ -294,7 +294,7 @@ app.post('/generate-pdf', authenticateToken, async (req, res) => {
                 });
             }
 
-            console.log(`✅ Report generated and saved: Patient ${patientData.name}, Report ID ${report._id}`);
+            console.log(`âœ… Report generated and saved: Patient ${patientData.name}, Report ID ${report._id}`);
         }
 
         const sanitizedPatientName = sanitizeFilename(patientData.name);
@@ -305,7 +305,7 @@ app.post('/generate-pdf', authenticateToken, async (req, res) => {
         res.send(pdf);
 
     } catch (error) {
-        console.error('❌ Error generating PDF:', error);
+        console.error('âŒ Error generating PDF:', error);
         res.status(500).json({ error: 'Failed to generate PDF report', details: error.message });
     } finally {
         if (browser) {
@@ -321,7 +321,7 @@ app.post('/generate-report', upload.array('images'), async (req, res) => {
         const { patientData, imagesPerPage, clinicData, reportType, imageSize } = req.body;
         const images = req.files || [];
 
-        console.log(`📋 Generating ${reportType} report for patient: ${patientData.name}`);
+        console.log(`ðŸ“‹ Generating ${reportType} report for patient: ${patientData.name}`);
 
         // Create browser instance
         browser = await createBrowser();
@@ -387,7 +387,7 @@ app.post('/generate-report', upload.array('images'), async (req, res) => {
                 });
             }
 
-            console.log(`✅ Report generated and saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
+            console.log(`âœ… Report generated and saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
         }
 
         const sanitizedPatientName = sanitizeFilename(patientData.name);
@@ -398,7 +398,7 @@ app.post('/generate-report', upload.array('images'), async (req, res) => {
         res.send(pdf);
 
     } catch (error) {
-        console.error('❌ Error generating PDF:', error);
+        console.error('âŒ Error generating PDF:', error);
         res.status(500).json({ error: 'Failed to generate PDF report', details: error.message });
     } finally {
         if (browser) {
@@ -420,7 +420,7 @@ app.get('/settings', authenticateToken, async (req, res) => {
         }
         res.json(settings);
     } catch (error) {
-        console.error('❌ Error fetching settings:', error);
+        console.error('âŒ Error fetching settings:', error);
         res.status(500).json({ error: 'Failed to fetch settings' });
     }
 });
@@ -444,7 +444,7 @@ app.post('/settings', authenticateToken, async (req, res) => {
         
         res.json({ success: true, settings });
     } catch (error) {
-        console.error('❌ Error updating settings:', error);
+        console.error('âŒ Error updating settings:', error);
         res.status(500).json({ error: 'Failed to update settings' });
     }
 });
@@ -499,11 +499,11 @@ app.post('/save-report', authenticateToken, async (req, res) => {
             });
         }
         
-        console.log(`✅ Report saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
+        console.log(`âœ… Report saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
         res.json({ success: true, reportId: report._id });
         
     } catch (error) {
-        console.error('❌ Error saving report:', error);
+        console.error('âŒ Error saving report:', error);
         res.status(500).json({ error: 'Failed to save report', details: error.message });
     }
 });
@@ -553,11 +553,11 @@ app.post('/save-report-form', upload.array('images'), async (req, res) => {
             });
         }
         
-        console.log(`✅ Report saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
+        console.log(`âœ… Report saved to database: Patient ${patientData.name}, Report ID ${report._id}`);
         res.json({ success: true, reportId: report._id });
         
     } catch (error) {
-        console.error('❌ Error saving report:', error);
+        console.error('âŒ Error saving report:', error);
         res.status(500).json({ error: 'Failed to save report', details: error.message });
     }
 });
@@ -587,7 +587,7 @@ app.get('/reports', authenticateToken, async (req, res) => {
         
         res.json(formattedReports);
     } catch (error) {
-        console.error('❌ Error fetching reports:', error);
+        console.error('âŒ Error fetching reports:', error);
         res.status(500).json({ error: 'Failed to fetch reports' });
     }
 });
@@ -617,10 +617,10 @@ app.delete('/reports/:id', async (req, res) => {
         // Delete the report
         await Report.findByIdAndDelete(reportId);
         
-        console.log(`✅ Report deleted from database: ID ${reportId}`);
+        console.log(`âœ… Report deleted from database: ID ${reportId}`);
         res.json({ success: true });
     } catch (error) {
-        console.error('❌ Error deleting report:', error);
+        console.error('âŒ Error deleting report:', error);
         res.status(500).json({ error: 'Failed to delete report' });
     }
 });
@@ -649,7 +649,7 @@ app.post('/generate-from-saved/:id', async (req, res) => {
             originalname: img.originalName
         }));
 
-        console.log(`📋 Generating PDF from saved ${reportType} report for patient: ${patientData.name}`);
+        console.log(`ðŸ“‹ Generating PDF from saved ${reportType} report for patient: ${patientData.name}`);
 
         // Create browser instance
         browser = await createBrowser();
@@ -690,7 +690,7 @@ app.post('/generate-from-saved/:id', async (req, res) => {
         res.send(pdf);
 
     } catch (error) {
-        console.error('❌ Error generating PDF from saved report:', error);
+        console.error('âŒ Error generating PDF from saved report:', error);
         res.status(500).json({ error: 'Failed to generate PDF from saved report', details: error.message });
     } finally {
         if (browser) {
@@ -706,14 +706,14 @@ function generateReportHTML(patientData, images, imagesPerPage, clinicData, repo
     
     // Convert image size percentage to actual size
     const sizePercentage = parseInt(imageSize) || 100;
-    console.log(`📏 Server received image size: ${imageSize}%, calculated: ${sizePercentage}%`);
+    console.log(`ðŸ“ Server received image size: ${imageSize}%, calculated: ${sizePercentage}%`);
     
     const baseWidth = 500; // Increased base width for better scaling
     const baseHeight = 400; // Increased base height for better scaling
     const imageWidth = Math.round(baseWidth * (sizePercentage / 100));
     const imageHeight = Math.round(baseHeight * (sizePercentage / 100));
     
-    console.log(`📐 Calculated image dimensions: ${imageWidth}px x ${imageHeight}px`);
+    console.log(`ðŸ“ Calculated image dimensions: ${imageWidth}px x ${imageHeight}px`);
     
     let imagesHTML = '';
     
@@ -922,33 +922,47 @@ async function findAvailablePort(startPort = 3000) {
 }
 
 // Start server
+// Start server
 async function startServer() {
     try {
-        // Initialize database
-        const dbInitialized = await initializeDatabase();
-        if (!dbInitialized) {
-            console.error('❌ Failed to initialize database. Exiting...');
-            process.exit(1);
+        // Initialize database (don't crash if it fails)
+        try {
+            const dbInitialized = await initializeDatabase();
+            if (dbInitialized) {
+                console.log('✅ Database initialized successfully');
+            } else {
+                console.log('⚠️  Database initialization failed, but server will continue');
+                console.log('💡 Please check Railway PostgreSQL connection and add DATABASE_URL');
+            }
+        } catch (dbError) {
+            console.log('⚠️  Database connection failed, but server will continue');
+            console.log('💡 Database will be initialized on first request');
+            console.log(`🔍 Database error: ${dbError.message}`);
         }
 
-        // Find available port
-        const port = await findAvailablePort(3000);
-        
-        app.listen(port, () => {
-            console.log(`🚀 Medical Imaging Report System running on http://localhost:${port}`);
-            console.log(`📊 Database: MongoDB`);
+        // Use Railway's PORT or fallback to 3000
+        const port = process.env.PORT || 3000;
+
+        app.listen(port, '0.0.0.0', () => {
+            console.log(`🚀 Medical Imaging Report System running on port ${port}`);
+            console.log(`🚂 Database: Railway PostgreSQL`);
             console.log(`📁 Reports saved to: ./reports/`);
             console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-            
-            // Auto-open browser on Windows
-            if (process.platform === 'win32') {
+
+            // Only auto-open browser in local development
+            if (process.env.NODE_ENV !== 'production' && process.platform === 'win32') {
                 exec(`start http://localhost:${port}`);
             }
         });
 
     } catch (error) {
         console.error('❌ Failed to start server:', error);
-        process.exit(1);
+        // Don't exit in production, just log the error
+        if (process.env.NODE_ENV === 'production') {
+            console.log('🔄 Server will continue running despite startup error');
+        } else {
+            process.exit(1);
+        }
     }
 }
 
