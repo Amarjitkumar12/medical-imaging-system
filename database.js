@@ -160,14 +160,14 @@ const initializeDatabase = async () => {
 // User model functions
 const User = {
   async create(userData) {
-    const { email, password, clinicName, doctorName, clinicAddress, clinicPhone, role } = userData;
+    const { email, password, clinicName, doctorName, clinicAddress, clinicPhone, role, isActive } = userData;
     const hashedPassword = await bcrypt.hash(password, 12);
     
     const result = await pool.query(`
-      INSERT INTO users (email, password, clinic_name, doctor_name, clinic_address, clinic_phone, role)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO users (email, password, clinic_name, doctor_name, clinic_address, clinic_phone, role, is_active)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
-    `, [email, hashedPassword, clinicName, doctorName, clinicAddress || '', clinicPhone || '', role || 'doctor']);
+    `, [email, hashedPassword, clinicName, doctorName, clinicAddress || '', clinicPhone || '', role || 'doctor', isActive !== false]);
     
     const user = result.rows[0];
     user.comparePassword = async function(candidatePassword) {
@@ -183,6 +183,7 @@ const User = {
     const user = result.rows[0];
     
     if (user) {
+      user.isActive = user.is_active; // Add compatibility mapping
       user.comparePassword = async function(candidatePassword) {
         return await bcrypt.compare(candidatePassword, this.password);
       };
@@ -197,6 +198,7 @@ const User = {
     
     if (user) {
       user._id = user.id; // MongoDB compatibility
+      user.isActive = user.is_active; // Add compatibility mapping
       user.comparePassword = async function(candidatePassword) {
         return await bcrypt.compare(candidatePassword, this.password);
       };
