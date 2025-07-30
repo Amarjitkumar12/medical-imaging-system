@@ -4,6 +4,10 @@
       "maxDuration": 30
     }
   },
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret"
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
