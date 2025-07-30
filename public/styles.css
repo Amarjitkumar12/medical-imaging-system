@@ -252,6 +252,15 @@ header h1::after {
     background: #f8f9fa;
 }
 
+.image-preview-item .crop-status {
+    padding: 4px 8px;
+    font-size: 10px;
+    color: #27ae60;
+    text-align: center;
+    background: #e8f5e8;
+    font-weight: 600;
+}
+
 .loading {
     position: fixed;
     top: 0;

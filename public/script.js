@@ -98,7 +98,71 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set initial image size value
     imageSizeValue.textContent = imageSize.value + '%';
 
-    // Function to compress image
+    // Function to auto-crop black borders from medical images
+    function cropBlackBorders(canvas, ctx, img) {
+        // Draw image to get pixel data
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        tempCtx.drawImage(img, 0, 0);
+        
+        const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+        const data = imageData.data;
+        
+        // Find crop boundaries by detecting non-black pixels
+        let minX = img.width, minY = img.height, maxX = 0, maxY = 0;
+        const threshold = 30; // Threshold for "black" pixels (0-30 is considered black)
+        
+        for (let y = 0; y < img.height; y++) {
+            for (let x = 0; x < img.width; x++) {
+                const i = (y * img.width + x) * 4;
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // If pixel is not black (above threshold)
+                if (r > threshold || g > threshold || b > threshold) {
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+        
+        // Add small padding to avoid cutting too close
+        const padding = 10;
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(img.width, maxX + padding);
+        maxY = Math.min(img.height, maxY + padding);
+        
+        // Calculate cropped dimensions
+        const cropWidth = maxX - minX;
+        const cropHeight = maxY - minY;
+        
+        // If we found valid crop area, use it; otherwise use original
+        if (cropWidth > 50 && cropHeight > 50) {
+            return {
+                x: minX,
+                y: minY,
+                width: cropWidth,
+                height: cropHeight,
+                cropped: true
+            };
+        } else {
+            return {
+                x: 0,
+                y: 0,
+                width: img.width,
+                height: img.height,
+                cropped: false
+            };
+        }
+    }
+
+    // Function to compress and crop image
     function compressImage(file, maxWidth = 1200, quality = 0.8) {
         return new Promise((resolve) => {
             const canvas = document.createElement('canvas');
@@ -106,8 +170,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const img = new Image();
 
             img.onload = function () {
-                // Calculate new dimensions
-                let { width, height } = img;
+                // Auto-crop black borders for X-ray images (if enabled)
+                const autoCropEnabled = document.getElementById('autoCrop').checked;
+                const cropInfo = autoCropEnabled ? 
+                    cropBlackBorders(canvas, ctx, img) : 
+                    { x: 0, y: 0, width: img.width, height: img.height, cropped: false };
+                
+                // Calculate new dimensions after cropping
+                let { width, height } = cropInfo;
                 if (width > maxWidth) {
                     height = (height * maxWidth) / width;
                     width = maxWidth;
@@ -116,10 +186,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 canvas.width = width;
                 canvas.height = height;
 
-                // Draw and compress
-                ctx.drawImage(img, 0, 0, width, height);
+                // Draw cropped and compressed image
+                ctx.fillStyle = 'white'; // White background
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.drawImage(
+                    img,
+                    cropInfo.x, cropInfo.y, cropInfo.width, cropInfo.height, // Source crop area
+                    0, 0, width, height // Destination area
+                );
+                
                 const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                resolve(compressedDataUrl);
+                
+                // Log cropping info for debugging
+                if (cropInfo.cropped) {
+                    console.log(`✂️ Auto-cropped image: ${file.name} (removed black borders)`);
+                } else {
+                    console.log(`📷 Processed image: ${file.name} (no cropping needed)`);
+                }
+                
+                resolve({
+                    dataUrl: compressedDataUrl,
+                    cropped: cropInfo.cropped
+                });
             };
 
             const reader = new FileReader();
@@ -137,7 +226,19 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             try {
-                const compressedDataUrl = await compressImage(file);
+                const result = await compressImage(file);
+                
+                // Handle both old and new return formats
+                let compressedDataUrl, wasCropped;
+                if (typeof result === 'string') {
+                    // Old format (fallback)
+                    compressedDataUrl = result;
+                    wasCropped = false;
+                } else {
+                    // New format with crop info
+                    compressedDataUrl = result.dataUrl;
+                    wasCropped = result.cropped;
+                }
 
                 uploadedImages.push({
                     name: file.name,
@@ -146,9 +247,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const previewItem = document.createElement('div');
                 previewItem.className = 'image-preview-item';
+                const cropStatusHTML = wasCropped ? '<div class="crop-status">✂️ Auto-cropped</div>' : '';
                 previewItem.innerHTML = `
                     <img src="${compressedDataUrl}" alt="${file.name}">
                     <div class="image-name">${file.name}</div>
+                    ${cropStatusHTML}
                 `;
                 imagePreview.appendChild(previewItem);
             } catch (error) {
