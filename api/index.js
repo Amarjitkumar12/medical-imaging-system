@@ -164,8 +164,9 @@ app.post('/api/login', authLimiter, async (req, res) => {
         }
 
         // Update last login
+        const { pool } = require('../database');
+        await pool.query('UPDATE users SET last_login = $1 WHERE id = $2', [new Date(), user.id]);
         user.lastLogin = new Date();
-        await user.save();
 
         // Generate JWT token
         const jwt = require('jsonwebtoken');
