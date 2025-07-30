@@ -30,7 +30,8 @@ const connectDB = async () => {
       console.log('   2. Copy the "Connection URL"');
       console.log('   3. Go to your app service');
       console.log('   4. Add environment variable: DATABASE_URL = [connection string]');
-      throw new Error('DATABASE_URL not found. Please connect Railway PostgreSQL to your app.');
+      console.log('🔄 Server will continue without database - add DATABASE_URL to connect');
+      return false; // Don't throw error, just return false
     }
     
     pool = new Pool({
@@ -58,6 +59,7 @@ const initializeDatabase = async () => {
     const connected = await connectDB();
     if (!connected) {
       console.log('⚠️  Database connection failed, will retry later');
+      console.log('💡 Server will continue running - database will connect when DATABASE_URL is added');
       return false;
     }
     
